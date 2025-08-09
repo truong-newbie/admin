@@ -485,7 +485,7 @@
                     <th>ID</th>
                     <th>Nội Dung</th>
                     <th>Người Viết</th>
-                    <th>Bài Viết</th>
+                    <th>Id Bài Viết</th>
                     <th>Ngày Tạo</th>
                     <th>Thao Tác</th>
                 </tr>
@@ -606,11 +606,8 @@
                 <input type="text" id="commentAuthor">
             </div>
             <div class="form-group" id="commentPostGroup">
-                <label>Bài viết</label>
-                <select id="commentPost">
-                    <option value="1">Hướng dẫn lập trình JavaScript</option>
-                    <option value="2">Thiết kế web responsive</option>
-                </select>
+                <label>ID Bài viết</label>
+                <input type="number" id="commentPost" placeholder="Nhập ID bài viết" min="1">
             </div>
             <div class="form-actions">
                 <button type="button" class="btn-secondary" data-close="commentModal">Hủy</button>
@@ -973,11 +970,16 @@
                 return;
             }
 
+            // Tìm bài viết theo ID để lấy tiêu đề
+            const postId = parseInt(postField.value);
+            const foundPost = posts.find(p => p.id === postId);
+            const postTitle = foundPost ? foundPost.title : ` ${postId}`;
+
             const commentData = {
                 id: comments.length > 0 ? Math.max(...comments.map(c => c.id)) + 1 : 1,
                 content: document.getElementById('commentContent').value,
                 author: authorField.value,
-                postTitle: postField.selectedOptions[0].text,
+                postTitle: postTitle,
                 date: new Date().toLocaleDateString('vi-VN')
             };
             comments.push(commentData);
