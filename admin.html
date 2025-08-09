@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang Quản Trị Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 2rem 0;
+        }
+
+        .logo {
+            text-align: center;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            padding: 0 1rem;
+        }
+
+        .nav-item {
+            padding: 1rem 1.5rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255, 255, 255, 0.1);
+            border-left-color: #fff;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 2rem;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .content-section {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #eee;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: #333;
+        }
+
+        .add-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .data-table th {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+        }
+
+        .data-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .data-table tr:hover {
+            background: #f8f9ff;
+        }
+
+        .action-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 0.25rem;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .edit-btn {
+            background: #28a745;
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background: #218838;
+            transform: scale(1.05);
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+            transform: scale(1.05);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #eee;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            border-left: 5px solid #667eea;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                display: flex;
+                overflow-x: auto;
+            }
+
+            .nav-item {
+                white-space: nowrap;
+                min-width: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="sidebar">
+        <div class="logo">🛡️ Admin Dashboard</div>
+        <div class="nav-item active" data-section="dashboard">
+            📊 Tổng Quan
+        </div>
+        <div class="nav-item" data-section="posts">
+            📝 Bài Viết
+        </div>
+        <div class="nav-item" data-section="users">
+            👥 Người Dùng
+        </div>
+        <div class="nav-item" data-section="comments">
+            💬 Bình Luận
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <h1 id="pageTitle">Tổng Quan Hệ Thống</h1>
+            <button class="logout-btn" id="logoutBtn">
+                🚪 Đăng Xuất
+            </button>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard" class="content-section active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalPosts">0</div>
+                    <div class="stat-label">Tổng Bài Viết</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalUsers">0</div>
+                    <div class="stat-label">Người Dùng</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalComments">0</div>
+                    <div class="stat-label">Bình Luận</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Posts Section -->
+        <div id="posts" class="content-section">
+            <div class="section-header">
+                <h2 class="section-title">Quản Lý Bài Viết</h2>
+                <button class="add-btn" data-modal="postModal">
+                    ➕ Thêm Bài Viết
+                </button>
+            </div>
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tiêu Đề</th>
+                    <th>Tác Giả</th>
+                    <th>Ngày Tạo</th>
+                    <th>Trạng Thái</th>
+                    <th>Thao Tác</th>
+                </tr>
+                </thead>
+                <tbody id="postsTableBody">
+                <tr>
+                    <td>1</td>
+                    <td>Hướng dẫn lập trình JavaScript</td>
+                    <td>Nguyễn Văn A</td>
+                    <td>08/08/2025</td>
+                    <td>Đã xuất bản</td>
+                    <td>
+                        <button class="action-btn edit-btn" onclick="editPost(1)">Sửa</button>
+                        <button class="action-btn delete-btn" onclick="deletePost(1)">Xóa</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Thiết kế web responsive</td>
+                    <td>Trần Thị B</td>
+                    <td>07/08/2025</td>
+                    <td>Nháp</td>
+                    <td>
+                        <button class="action-btn edit-btn" onclick="editPost(2)">Sửa</button>
+                        <button class="action-btn delete-btn" onclick="deletePost(2)">Xóa</button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Users Section -->
+        <div id="users" class="content-section">
+            <div class="section-header">
+                <h2 class="section-title">Quản Lý Người Dùng</h2>
+                <button class="add-btn" data-modal="userModal">
+                    ➕ Thêm Người Dùng
+                </button>
+            </div>
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tên</th>
+                    <th>Email</th>
+                    <th>Vai Trò</th>
+                    <th>Ngày Tham Gia</th>
+                    <th>Thao Tác</th>
+                </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                <tr>
+                    <td>1</td>
+                    <td>Nguyễn Văn A</td>
+                    <td>nguyenvana@email.com</td>
+                    <td>Admin</td>
+                    <td>01/08/2025</td>
+                    <td>
+                        <button class="action-btn edit-btn" onclick="editUser(1)">Sửa</button>
+                        <button class="action-btn delete-btn" onclick="deleteUser(1)">Xóa</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Trần Thị B</td>
+                    <td>tranthib@email.com</td>
+                    <td>Người dùng</td>
+                    <td>02/08/2025</td>
+                    <td>
+                        <button class="action-btn edit-btn" onclick="editUser(2)">Sửa</button>
+                        <button class="action-btn delete-btn" onclick="deleteUser(2)">Xóa</button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Comments Section -->
+        <div id="comments" class="content-section">
+            <div class="section-header">
+                <h2 class="section-title">Quản Lý Bình Luận</h2>
+                <button class="add-btn" data-modal="commentModal">
+                    ➕ Thêm Bình Luận
+                </button>
+            </div>
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nội Dung</th>
+                    <th>Người Viết</th>
+                    <th>Bài Viết</th>
+                    <th>Ngày Tạo</th>
+                    <th>Thao Tác</th>
+                </tr>
+                </thead>
+                <tbody id="commentsTableBody">
+                <tr>
+                    <td>1</td>
+                    <td>Bài viết rất hữu ích!</td>
+                    <td>Lê Văn C</td>
+                    <td>Hướng dẫn lập trình JavaScript</td>
+                    <td>08/08/2025</td>
+                    <td>
+                        <button class="action-btn edit-btn" onclick="editComment(1)">Sửa</button>
+                        <button class="action-btn delete-btn" onclick="deleteComment(1)">Xóa</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Cảm ơn tác giả đã chia sẻ</td>
+                    <td>Phạm Thị D</td>
+                    <td>Thiết kế web responsive</td>
+                    <td>07/08/2025</td>
+                    <td>
+                        <button class="action-btn edit-btn" onclick="editComment(2)">Sửa</button>
+                        <button class="action-btn delete-btn" onclick="deleteComment(2)">Xóa</button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Post Modal -->
+<div id="postModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="postModalTitle">Thêm Bài Viết Mới</h3>
+            <button class="close-btn" data-close="postModal">&times;</button>
+        </div>
+        <form id="postForm">
+            <div class="form-group">
+                <label>Tiêu đề</label>
+                <input type="text" id="postTitle" required>
+            </div>
+            <div class="form-group">
+                <label>Nội dung</label>
+                <textarea id="postContent" rows="5" required></textarea>
+            </div>
+            <div class="form-group">
+                <label>Tác giả</label>
+                <input type="text" id="postAuthor" required>
+            </div>
+            <div class="form-group">
+                <label>Trạng thái</label>
+                <select id="postStatus">
+                    <option value="draft">Nháp</option>
+                    <option value="published">Đã xuất bản</option>
+                </select>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" data-close="postModal">Hủy</button>
+                <button type="submit" class="btn-primary">Lưu</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- User Modal -->
+<div id="userModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="userModalTitle">Thêm Người Dùng Mới</h3>
+            <button class="close-btn" data-close="userModal">&times;</button>
+        </div>
+        <form id="userForm">
+            <div class="form-group">
+                <label>Tên</label>
+                <input type="text" id="userName" required>
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="userEmail" required>
+            </div>
+            <div class="form-group">
+                <label>Mật khẩu</label>
+                <input type="password" id="userPassword" required>
+            </div>
+            <div class="form-group">
+                <label>Vai trò</label>
+                <select id="userRole">
+                    <option value="user">Người dùng</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" data-close="userModal">Hủy</button>
+                <button type="submit" class="btn-primary">Lưu</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Comment Modal -->
+<div id="commentModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="commentModalTitle">Thêm Bình Luận Mới</h3>
+            <button class="close-btn" data-close="commentModal">&times;</button>
+        </div>
+        <form id="commentForm">
+            <div class="form-group">
+                <label>Nội dung</label>
+                <textarea id="commentContent" rows="3" required></textarea>
+            </div>
+            <div class="form-group" id="commentAuthorGroup">
+                <label>Người viết</label>
+                <input type="text" id="commentAuthor">
+            </div>
+            <div class="form-group" id="commentPostGroup">
+                <label>Bài viết</label>
+                <select id="commentPost">
+                    <option value="1">Hướng dẫn lập trình JavaScript</option>
+                    <option value="2">Thiết kế web responsive</option>
+                </select>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" data-close="commentModal">Hủy</button>
+                <button type="submit" class="btn-primary">Lưu</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Data storage (in real app, this would be connected to a backend)
+    let posts = [
+        {id: 1, title: 'Hướng dẫn lập trình JavaScript', author: 'Nguyễn Văn A', date: '08/08/2025', status: 'Đã xuất bản', content: 'Nội dung bài viết...'},
+        {id: 2, title: 'Thiết kế web responsive', author: 'Trần Thị B', date: '07/08/2025', status: 'Nháp', content: 'Nội dung bài viết...'}
+    ];
+
+    let users = [
+        {id: 1, name: 'Nguyễn Văn A', email: 'nguyenvana@email.com', role: 'Admin', joinDate: '01/08/2025'},
+        {id: 2, name: 'Trần Thị B', email: 'tranthib@email.com', role: 'Người dùng', joinDate: '02/08/2025'}
+    ];
+
+    let comments = [
+        {id: 1, content: 'Bài viết rất hữu ích!', author: 'Lê Văn C', postTitle: 'Hướng dẫn lập trình JavaScript', date: '08/08/2025'},
+        {id: 2, content: 'Cảm ơn tác giả đã chia sẻ', author: 'Phạm Thị D', postTitle: 'Thiết kế web responsive', date: '07/08/2025'}
+    ];
+
+    let currentEditId = null;
+    let currentEditType = null;
+
+    // Wait for DOM to load
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeEventListeners();
+        renderAllData();
+    });
+
+    function initializeEventListeners() {
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const section = this.getAttribute('data-section');
+                if (section) showSection(section);
+            });
+        });
+
+        // Logout button
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+
+        // Add buttons
+        document.querySelectorAll('[data-modal]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const modalId = this.getAttribute('data-modal');
+                // Reset edit state khi mở modal thêm mới
+                currentEditId = null;
+                currentEditType = null;
+                openModal(modalId);
+            });
+        });
+
+        // Close buttons
+        document.querySelectorAll('[data-close]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const modalId = this.getAttribute('data-close');
+                closeModal(modalId);
+            });
+        });
+
+        // Form submissions
+        document.getElementById('postForm').addEventListener('submit', handlePostSubmit);
+        document.getElementById('userForm').addEventListener('submit', handleUserSubmit);
+        document.getElementById('commentForm').addEventListener('submit', handleCommentSubmit);
+
+        // Close modals when clicking outside
+        window.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                e.target.style.display = 'none';
+            }
+        });
+    }
+
+    // Update dashboard stats
+    function updateDashboardStats() {
+        document.getElementById('totalPosts').textContent = posts.length;
+        document.getElementById('totalUsers').textContent = users.length;
+        document.getElementById('totalComments').textContent = comments.length;
+    }
+
+    // Navigation
+    function showSection(sectionId) {
+        // Hide all sections
+        const sections = document.querySelectorAll('.content-section');
+        sections.forEach(section => section.classList.remove('active'));
+
+        // Remove active class from nav items
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach(item => item.classList.remove('active'));
+
+        // Show selected section
+        document.getElementById(sectionId).classList.add('active');
+
+        // Add active class to clicked nav item
+        document.querySelector(`[data-section="${sectionId}"]`).classList.add('active');
+
+        // Update page title
+        const titles = {
+            'dashboard': 'Tổng Quan Hệ Thống',
+            'posts': 'Quản Lý Bài Viết',
+            'users': 'Quản Lý Người Dùng',
+            'comments': 'Quản Lý Bình Luận'
+        };
+        document.getElementById('pageTitle').textContent = titles[sectionId];
+    }
+
+    // Modal functions
+    function openModal(modalId) {
+        document.getElementById(modalId).style.display = 'block';
+
+        // Reset form
+        const form = document.querySelector(`#${modalId} form`);
+        if (form) form.reset();
+
+        // Nếu không phải chỉnh sửa, reset trạng thái và hiện lại tất cả fields
+        if (!currentEditId) {
+            currentEditType = null;
+
+            if (modalId === 'commentModal') {
+                document.getElementById('commentAuthorGroup').style.display = 'block';
+                document.getElementById('commentPostGroup').style.display = 'block';
+            }
+        }
+
+        // Update modal title
+        const titleMap = {
+            'postModal': currentEditId ? 'Chỉnh Sửa Bài Viết' : 'Thêm Bài Viết Mới',
+            'userModal': currentEditId ? 'Chỉnh Sửa Người Dùng' : 'Thêm Người Dùng Mới',
+            'commentModal': currentEditId ? 'Chỉnh Sửa Bình Luận' : 'Thêm Bình Luận Mới'
+        };
+        const titleElement = document.querySelector(`#${modalId} h3`);
+        if (titleElement) titleElement.textContent = titleMap[modalId];
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+
+        // Reset edit state và hiện lại tất cả fields
+        currentEditId = null;
+        currentEditType = null;
+
+        if (modalId === 'commentModal') {
+            document.getElementById('commentAuthorGroup').style.display = 'block';
+            document.getElementById('commentPostGroup').style.display = 'block';
+        }
+    }
+
+    // Render functions
+    function renderAllData() {
+        renderPosts();
+        renderUsers();
+        renderComments();
+        updateDashboardStats(); // Cập nhật số liệu dashboard
+    }
+
+    function renderPosts() {
+        const tbody = document.getElementById('postsTableBody');
+        tbody.innerHTML = posts.map(post => `
+                <tr>
+                    <td>${post.id}</td>
+                    <td>${post.title}</td>
+                    <td>${post.author}</td>
+                    <td>${post.date}</td>
+                    <td>${post.status}</td>
+                    <td>
+                        <button class="action-btn edit-btn" onclick="editPost(${post.id})">Sửa</button>
+                        <button class="action-btn delete-btn" onclick="deletePost(${post.id})">Xóa</button>
+                    </td>
+                </tr>
+            `).join('');
+    }
+
+    function renderUsers() {
+        const tbody = document.getElementById('usersTableBody');
+        tbody.innerHTML = users.map(user => `
+                <tr>
+                    <td>${user.id}</td>
+                    <td>${user.name}</td>
+                    <td>${user.email}</td>
+                    <td>${user.role}</td>
+                    <td>${user.joinDate}</td>
+                    <td>
+                        <button class="action-btn edit-btn" onclick="editUser(${user.id})">Sửa</button>
+                        <button class="action-btn delete-btn" onclick="deleteUser(${user.id})">Xóa</button>
+                    </td>
+                </tr>
+            `).join('');
+    }
+
+    function renderComments() {
+        const tbody = document.getElementById('commentsTableBody');
+        tbody.innerHTML = comments.map(comment => `
+                <tr>
+                    <td>${comment.id}</td>
+                    <td>${comment.content}</td>
+                    <td>${comment.author}</td>
+                    <td>${comment.postTitle}</td>
+                    <td>${comment.date}</td>
+                    <td>
+                        <button class="action-btn edit-btn" onclick="editComment(${comment.id})">Sửa</button>
+                        <button class="action-btn delete-btn" onclick="deleteComment(${comment.id})">Xóa</button>
+                    </td>
+                </tr>
+            `).join('');
+    }
+
+    // CRUD Operations for Posts
+    window.editPost = function(id) {
+        const post = posts.find(p => p.id === id);
+        if (post) {
+            currentEditId = id;
+            currentEditType = 'post';
+
+            document.getElementById('postTitle').value = post.title;
+            document.getElementById('postContent').value = post.content;
+            document.getElementById('postAuthor').value = post.author;
+            document.getElementById('postStatus').value = post.status === 'Đã xuất bản' ? 'published' : 'draft';
+
+            document.getElementById('postModalTitle').textContent = 'Chỉnh Sửa Bài Viết';
+            openModal('postModal');
+        }
+    };
+
+    window.deletePost = function(id) {
+        if (confirm('Bạn có chắc chắn muốn xóa bài viết này?')) {
+            posts = posts.filter(p => p.id !== id);
+            renderPosts();
+            updateDashboardStats(); // Cập nhật stats
+            showNotification('Đã xóa bài viết thành công!');
+        }
+    };
+
+    // CRUD Operations for Users
+    window.editUser = function(id) {
+        const user = users.find(u => u.id === id);
+        if (user) {
+            currentEditId = id;
+            currentEditType = 'user';
+
+            document.getElementById('userName').value = user.name;
+            document.getElementById('userEmail').value = user.email;
+            document.getElementById('userRole').value = user.role.toLowerCase();
+
+            document.getElementById('userModalTitle').textContent = 'Chỉnh Sửa Người Dùng';
+            openModal('userModal');
+        }
+    };
+
+    window.deleteUser = function(id) {
+        if (confirm('Bạn có chắc chắn muốn xóa người dùng này?')) {
+            users = users.filter(u => u.id !== id);
+            renderUsers();
+            updateDashboardStats(); // Cập nhật stats
+            showNotification('Đã xóa người dùng thành công!');
+        }
+    };
+
+    // CRUD Operations for Comments
+    window.editComment = function(id) {
+        const comment = comments.find(c => c.id === id);
+        if (comment) {
+            currentEditId = id;
+            currentEditType = 'comment';
+
+            // Chỉ hiện nội dung khi sửa, ẩn 2 field kia
+            document.getElementById('commentContent').value = comment.content;
+            document.getElementById('commentAuthorGroup').style.display = 'none';
+            document.getElementById('commentPostGroup').style.display = 'none';
+
+            document.getElementById('commentModalTitle').textContent = 'Chỉnh Sửa Bình Luận';
+            openModal('commentModal');
+        }
+    };
+
+    window.deleteComment = function(id) {
+        if (confirm('Bạn có chắc chắn muốn xóa bình luận này?')) {
+            comments = comments.filter(c => c.id !== id);
+            renderComments();
+            updateDashboardStats(); // Cập nhật stats
+            showNotification('Đã xóa bình luận thành công!');
+        }
+    };
+
+    // Form submissions
+    function handlePostSubmit(e) {
+        e.preventDefault();
+
+        const postData = {
+            id: currentEditId || (posts.length > 0 ? Math.max(...posts.map(p => p.id)) + 1 : 1),
+            title: document.getElementById('postTitle').value,
+            content: document.getElementById('postContent').value,
+            author: document.getElementById('postAuthor').value,
+            status: document.getElementById('postStatus').value === 'published' ? 'Đã xuất bản' : 'Nháp',
+            date: new Date().toLocaleDateString('vi-VN')
+        };
+
+        if (currentEditId) {
+            const index = posts.findIndex(p => p.id === currentEditId);
+            posts[index] = {...posts[index], ...postData};
+            showNotification('Đã cập nhật bài viết thành công!');
+        } else {
+            posts.push(postData);
+            showNotification('Đã thêm bài viết mới thành công!');
+        }
+
+        renderPosts();
+        updateDashboardStats(); // Cập nhật stats
+        closeModal('postModal');
+    }
+
+    function handleUserSubmit(e) {
+        e.preventDefault();
+
+        const userData = {
+            id: currentEditId || (users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1),
+            name: document.getElementById('userName').value,
+            email: document.getElementById('userEmail').value,
+            role: document.getElementById('userRole').value === 'admin' ? 'Admin' : 'Người dùng',
+            joinDate: new Date().toLocaleDateString('vi-VN')
+        };
+
+        if (currentEditId) {
+            const index = users.findIndex(u => u.id === currentEditId);
+            users[index] = {...users[index], ...userData};
+            showNotification('Đã cập nhật người dùng thành công!');
+        } else {
+            users.push(userData);
+            showNotification('Đã thêm người dùng mới thành công!');
+        }
+
+        renderUsers();
+        updateDashboardStats(); // Cập nhật stats
+        closeModal('userModal');
+    }
+
+    function handleCommentSubmit(e) {
+        e.preventDefault();
+
+        if (currentEditId) {
+            // Chỉnh sửa: chỉ update nội dung
+            const index = comments.findIndex(c => c.id === currentEditId);
+            if (index !== -1) {
+                comments[index].content = document.getElementById('commentContent').value;
+                console.log('Updated comment:', comments[index]); // Debug
+            }
+            showNotification('Đã cập nhật bình luận thành công!');
+        } else {
+            // Thêm mới: cần có đủ thông tin
+            const authorField = document.getElementById('commentAuthor');
+            const postField = document.getElementById('commentPost');
+
+            if (!authorField.value || !postField.value) {
+                alert('Vui lòng điền đầy đủ thông tin!');
+                return;
+            }
+
+            const commentData = {
+                id: comments.length > 0 ? Math.max(...comments.map(c => c.id)) + 1 : 1,
+                content: document.getElementById('commentContent').value,
+                author: authorField.value,
+                postTitle: postField.selectedOptions[0].text,
+                date: new Date().toLocaleDateString('vi-VN')
+            };
+            comments.push(commentData);
+            showNotification('Đã thêm bình luận mới thành công!');
+        }
+
+        renderComments();
+        updateDashboardStats();
+        closeModal('commentModal');
+    }
+
+    // Logout function
+    function logout() {
+        if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
+            showNotification('Đang đăng xuất...');
+            setTimeout(() => {
+                // Chuyển hướng về trang đăng nhập hoặc trang chủ
+                window.location.href = 'about:blank'; // Hoặc trang đăng nhập của bạn
+            }, 1500);
+        }
+    }
+
+    // Notification function
+    function showNotification(message) {
+        const notification = document.createElement('div');
+        notification.innerHTML = message;
+        notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #28a745;
+                color: white;
+                padding: 1rem 2rem;
+                border-radius: 8px;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+                z-index: 10000;
+                animation: slideIn 0.3s ease;
+            `;
+
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease forwards';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    document.body.removeChild(notification);
+                }
+            }, 300);
+        }, 3000);
+    }
+
+    // Add CSS for notifications
+    const style = document.createElement('style');
+    style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+    document.head.appendChild(style);
+</script>
+</body>
+</html>;
